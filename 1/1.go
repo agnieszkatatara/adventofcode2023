@@ -9,7 +9,7 @@ import (
 	"unicode"
 )
 
-func main2() {
+func main() {
 	sum := 0
 	content, error := os.Open("input.txt")
 	if error != nil {

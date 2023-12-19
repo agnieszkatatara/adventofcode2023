@@ -10,7 +10,7 @@ import (
 	"unicode"
 )
 
-func main() {
+func main2() {
 	content, error := os.Open("input.txt")
 	numbers := []int{}
 	sum := 0
@@ -31,28 +31,16 @@ func main() {
 		no_first_number := 0
 		for i := 0; i < len(line); i++ {
 			if unicode.IsNumber(rune(line[i])) {
-				//fmt.Println("my i")
-				//fmt.Println(i)
-				//fmt.Println("I found my number as string(line[i])")
-				//fmt.Println(string(line[i]))
 				if no_first_number == 0 && i == 0 {
 					no_first_number = 1
-					fmt.Printf("my number %c \n", rune(line[i]))
 					numbers_in_line = append(numbers_in_line, string(line[i]))
-					fmt.Printf("I found a number super early %s \n", numbers_in_line[0])
-					fmt.Println("I work")
 				}
 				if no_first_number == 0 {
-					fmt.Printf("I pass this string %s\n", string(line[0:i]))
 					success, output := find_textual_number_earlier(string(line[0:i]))
-
 					if success {
 						numbers_in_line = append(numbers_in_line, output)
-						fmt.Printf("I add this digit %c \n", output)
 					} else {
-						//ddebug this
 						numbers_in_line = append(numbers_in_line, string(line[i]))
-						fmt.Printf("I added this digit %s\n", string(line[i]))
 					}
 					no_first_number = 1
 				}
@@ -61,31 +49,20 @@ func main() {
 
 			}
 
-			fmt.Println("My line and length")
-			fmt.Println(i)
-			fmt.Println(len(line) - 1)
 			if i == len(line)-1 {
 				if no_first_number == 0 {
-					fmt.Printf("There is no first digit I pass this string %s\n", string(line))
 					success, output := find_textual_number_earlier(string(line))
 
 					if success {
 						numbers_in_line = append(numbers_in_line, output)
-						fmt.Printf("I add this digit %c \n", output)
 					}
 				}
-				fmt.Printf("I am in my last loop for the word %s and the last digit is %s \n", line, last_digit_to_pass_string)
-				fmt.Printf("I am passing %s", string(line[last_digit_to_pass_index:]))
 				success, output := find_textual_number_later(string(line[last_digit_to_pass_index:]))
 
 				if success {
-					fmt.Println("my later output %c, %c \n", success, output)
 					numbers_in_line = append(numbers_in_line, output)
-					fmt.Printf("I add later this digit %c \n", output)
 				} else {
-					//ddebug this
 					numbers_in_line = append(numbers_in_line, string(line[last_digit_to_pass_index]))
-					fmt.Printf("I added with later this digit %s\n", string(line[last_digit_to_pass_index]))
 				}
 			}
 		}
@@ -97,7 +74,6 @@ func main() {
 		}
 		numbers = append(numbers, num)
 	}
-	fmt.Println("Integers in the list:")
 	for _, value := range numbers {
 		fmt.Println(value)
 	}
@@ -115,10 +91,8 @@ func find_textual_number_earlier(string_to_find_number string) (bool, string) {
 	lowest_index := 0
 	earliest_value := 0
 	for i, str := range numbers_in_text {
-		//fmt.Printf("looking in %d %s \n", i, str)
 		index := strings.Index(string_to_find_number, str)
 		if index != -1 {
-			fmt.Printf("I found a hidden number in %s, and it is in index %d \n", string_to_find_number, index)
 			if already_existed == false {
 				already_existed = true
 				lowest_index = index
@@ -147,10 +121,8 @@ func find_textual_number_later(string_to_find_number string) (bool, string) {
 	highest_index := 0
 	latest_value := 0
 	for i, str := range numbers_in_text {
-		fmt.Printf("looking in %d %s \n", i, str)
 		index := strings.LastIndex(string_to_find_number, str)
 		if index != -1 {
-			fmt.Printf("I found a hidden number in %s, and it is in index %d \n", string_to_find_number, index)
 			if already_existed == false {
 				already_existed = true
 				highest_index = index
@@ -166,10 +138,8 @@ func find_textual_number_later(string_to_find_number string) (bool, string) {
 	}
 
 	if already_existed {
-		fmt.Printf("Later adding %string \n", strconv.Itoa(latest_value))
 		return true, strconv.Itoa(latest_value)
 	} else {
-		fmt.Printf("Later not adding %s \n", "0")
 		return false, "0"
 	}
 }
