@@ -6,26 +6,29 @@ import (
 	"io"
 	"log"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 )
 
-func main() {
-	var data []string
-	var no_map_prefix_data []string
-	var next_map_check []string
-	var current_number int
-	var next_number int
-	content, error := os.Open("input.txt")
+var fiveOfAKind []string
+var fourOfAKind []string
+var fullHouse []string
+var threeOfAKind []string
+var twoPairs []string
+var onePair []string
+var highCard []string
 
+func main() {
+	content, error := os.Open("input.txt")
+	var data [][]string
+	var mapOfHands map[string]int
 	if error != nil {
 		fmt.Println("Finished reading a file")
 		os.Exit(2)
 	}
 	reader := bufio.NewReader(content)
 
-	// Reading board data
+	// Reading data
 	for {
 		line, err := reader.ReadString('\n')
 		line = strings.TrimSuffix(line, "\n")
@@ -35,100 +38,239 @@ func main() {
 			}
 			log.Fatal(err)
 		}
-		data = append(data, line)
+
+		data = append(data, readTwoConsecutiveStrings(line))
 	}
-	for i := 3; i < len(data); i++ {
-		if !strings.Contains(data[i], "map") {
-			no_map_prefix_data = append(no_map_prefix_data, data[i])
-		}
+	//fmt.Println(data)
+	for i := 0; i < len(data); i++ {
+		typesOfHands(data[i][0])
 	}
-	var min int = 100000000000000
-	//inputs := []int{2880930400, 17599561, 549922357, 200746426, 1378552684, 43534336, 155057073, 56546377, 824205101, 378503603, 1678376802, 130912435, 2685513694, 137778160, 2492361384, 188575752, 3139914842, 1092214826, 2989476473, 58874625}
-	//inputs := []int{2880930400, 17599561}
-	//inputs := []int{79, 14, 55, 13}
-	//inputs := []int{2880930400, 17599561, 549922357}
-	for liczby := 2880930400; liczby < 2880930400+175913; liczby++ {
-		current_number = liczby
-		next_map_check = next_map_check[:0]
-		for i := 0; i < len(no_map_prefix_data); i++ {
-			if no_map_prefix_data[i] == "" {
-				//fmt.Println(next_map_check)
-				sortBasedOnThirdElement(next_map_check)
-				//fmt.Println("sorted")
-				//fmt.Println(next_map_check)
-				next_number = find_if_number_is_weird(current_number, next_map_check)
-				current_number = next_number
-				next_map_check = next_map_check[:0]
-				//fmt.Println("should be empty")
-				//fmt.Println(next_map_check)
-				//fmt.Println("switch")
-				//fmt.Println(current_number)
-			}
-			if no_map_prefix_data[i] != "" {
-				//fmt.Println("dodaje")
-				//fmt.Println(no_map_prefix_data[i])
-				next_map_check = append(next_map_check, no_map_prefix_data[i])
-				//fmt.Println("should be inc")
-				//fmt.Println(next_map_check)
-			}
-		}
-		//fmt.Println("last czeck")
-		current_number = find_if_number_is_weird(current_number, next_map_check)
-		//fmt.Println("all")
-		//fmt.Println(current_number)
-		//fmt.Println(inputs[liczby])
-		//fmt.Println(current_number)
-		if current_number < min {
-			min = current_number
-			fmt.Println(min)
-		}
+	// fmt.Println("all")
+	mapOfHands = turnListIntoMap(data)
+	//fmt.Println(mapOfHands)
+	//fmt.Println(sortList(sortList(sortList(sortList(sortList(sortList(sortList(sortList(fourOfAKind)))))))))
+
+	for i := 0; i < 20001; i++ {
+		fiveOfAKind = sortList(fiveOfAKind)
+		fourOfAKind = sortList(fourOfAKind)
+		fullHouse = sortList(fullHouse)
+		threeOfAKind = sortList(threeOfAKind)
+		twoPairs = sortList(twoPairs)
+		onePair = sortList(onePair)
+		highCard = sortList(highCard)
+	}
+	// fmt.Println("fiveOfAKind")
+	// fmt.Println(fiveOfAKind)
+	// fmt.Println("fourOfAKind")
+	// fmt.Println(fourOfAKind)
+	// fmt.Println("fullHouse")
+	// fmt.Println(fullHouse)
+	// fmt.Println("threeOfAKind")
+	// fmt.Println(threeOfAKind)
+	// fmt.Println("twoPairs")
+	// fmt.Println(twoPairs)
+	// fmt.Println("onePair")
+	// fmt.Println(onePair)
+	// fmt.Println("highCard")
+	// fmt.Println(highCard)
+	// fmt.Println("checking stronger functiom")
+	var result int = 0
+	for i := 0; i < len(highCard); i++ {
+		result = result + (i+1)*mapOfHands[highCard[i]]
+	}
+	for i := 0; i < len(onePair); i++ {
+		result = result + (i+1+len(highCard))*mapOfHands[onePair[i]]
+	}
+	for i := 0; i < len(twoPairs); i++ {
+		result = result + (i+1+len(highCard)+len(onePair))*mapOfHands[twoPairs[i]]
+	}
+	for i := 0; i < len(threeOfAKind); i++ {
+		result = result + (i+1+len(highCard)+len(onePair)+len(twoPairs))*mapOfHands[threeOfAKind[i]]
+	}
+	for i := 0; i < len(fullHouse); i++ {
+		result = result + (i+1+len(highCard)+len(onePair)+len(twoPairs)+len(threeOfAKind))*mapOfHands[fullHouse[i]]
+	}
+	for i := 0; i < len(fourOfAKind); i++ {
+		result = result + (i+1+len(highCard)+len(onePair)+len(twoPairs)+len(threeOfAKind)+len(fullHouse))*mapOfHands[fourOfAKind[i]]
+	}
+	for i := 0; i < len(fiveOfAKind); i++ {
+		result = result + (i+1+len(highCard)+len(onePair)+len(twoPairs)+len(threeOfAKind)+len(fullHouse)+len(fourOfAKind))*mapOfHands[fiveOfAKind[i]]
 	}
 
+	fmt.Println(result)
 }
 
-func sortBasedOnThirdElement(list []string) {
-	sort.Slice(list, func(i, j int) bool {
-		// Split the strings by space
-		splitI := strings.Split(list[i], " ")
-		splitJ := strings.Split(list[j], " ")
-
-		// Convert the third element to integer for comparison
-		valI, errI := strconv.Atoi(splitI[1])
-		valJ, errJ := strconv.Atoi(splitJ[1])
-
-		// Handle potential conversion errors
-		if errI != nil {
-			panic(errI)
-		}
-		if errJ != nil {
-			panic(errJ)
-		}
-
-		// Compare the integers
-		return valI < valJ
-	})
-}
-
-func find_if_number_is_weird(source int, list_of_sources_destinations []string) int {
-	var in_string string
-
-	left, right := 0, len(list_of_sources_destinations)-1
-	var mid int
-	result := source // Default to -1 if no larger number is found
-
-	for left <= right {
-		mid = left + (right-left)/2
-		in_string = strings.Split(list_of_sources_destinations[mid], " ")[1]
-		in_int, error := strconv.Atoi(in_string)
-		if error != nil {
-			fmt.Println("error while converting to int")
-		}
-		if in_int <= source {
-			left = mid + 1
+func sortList(list []string) []string {
+	if len(list) == 0 {
+		return list
+	}
+	for i, _ := range list[:len(list)-1] {
+		if list[i][0] != list[i+1][0] {
+			list[i], list[i+1] = checkWhichIsWeaker(list[i], list[i+1], 0)
+		} else if list[i][1] != list[i+1][1] {
+			list[i], list[i+1] = checkWhichIsWeaker(list[i], list[i+1], 1)
+		} else if list[i][2] != list[i+1][2] {
+			list[i], list[i+1] = checkWhichIsWeaker(list[i], list[i+1], 2)
+		} else if list[i][3] != list[i+1][3] {
+			list[i], list[i+1] = checkWhichIsWeaker(list[i], list[i+1], 3)
 		} else {
-			result = in_int
-			right = mid - 1
+			list[i], list[i+1] = checkWhichIsWeaker(list[i], list[i+1], 4)
 		}
 	}
-	return result
+	return list
+}
+
+func readTwoConsecutiveStrings(s string) []string {
+	fields := strings.Fields(s)
+	numbers := make([]string, 0, 1)
+
+	for _, number := range fields {
+		numbers = append(numbers, number)
+	}
+
+	return numbers
+}
+
+func turnListIntoMap(list [][]string) map[string]int {
+	set := make(map[string]int)
+	for _, pair := range list {
+		if len(pair) == 2 {
+			number, err := strconv.Atoi(pair[1])
+			if err != nil {
+				return nil
+			}
+			set[pair[0]] = number
+		}
+	}
+	return set
+}
+
+func checkWhichIsWeaker(one string, two string, value int) (string, string) {
+	var values map[string]int
+	values = map[string]int{"A": 14, "K": 13, "Q": 12, "T": 10, "9": 9, "8": 8, "7": 7, "6": 6, "5": 5, "4": 4, "3": 3, "2": 2, "J": 1}
+	if values[string(one[value])] >= values[string(two[value])] {
+		return two, one
+	} else {
+		return one, two
+	}
+}
+
+func typesOfHands(one string) {
+	occurrences := make(map[string]int)
+	for _, char := range one {
+		occurrences[string(char)]++
+	}
+	assignCardsToType(occurrences, one)
+}
+
+func assignCardsToType(occurences map[string]int, hand string) {
+
+	for _, value := range occurences {
+		if strings.Count(hand, "J") == 1 {
+			if len(occurences) == 2 {
+				fiveOfAKind = append(fiveOfAKind, hand)
+				return
+			}
+			if len(occurences) == 3 && value == 2 {
+				fullHouse = append(fullHouse, hand)
+				return
+			}
+
+			if len(occurences) == 3 && value == 3 {
+				fourOfAKind = append(fourOfAKind, hand)
+				return
+			}
+
+			if len(occurences) == 3 {
+				continue
+			}
+
+			if len(occurences) == 4 {
+				threeOfAKind = append(threeOfAKind, hand)
+				return
+			}
+
+			if len(occurences) == 5 {
+				onePair = append(onePair, hand)
+				return
+			}
+		}
+
+		if strings.Count(hand, "J") == 2 {
+			if len(occurences) == 2 {
+				fiveOfAKind = append(fiveOfAKind, hand)
+				return
+			}
+
+			if len(occurences) == 3 {
+				fourOfAKind = append(fourOfAKind, hand)
+				return
+			}
+
+			if len(occurences) == 4 {
+				threeOfAKind = append(threeOfAKind, hand)
+				return
+			}
+		}
+
+		if strings.Count(hand, "J") == 3 {
+			if len(occurences) == 3 {
+				fourOfAKind = append(fourOfAKind, hand)
+				return
+			}
+
+			if len(occurences) == 2 {
+				fiveOfAKind = append(fiveOfAKind, hand)
+				return
+			}
+		}
+
+		if strings.Count(hand, "J") == 4 {
+			fiveOfAKind = append(fiveOfAKind, hand)
+			return
+		} else {
+
+			if value == 5 {
+				fiveOfAKind = append(fiveOfAKind, hand)
+				return
+			}
+
+			if (value == 4 || value == 1) && len(occurences) == 2 {
+				fourOfAKind = append(fourOfAKind, hand)
+				return
+			}
+
+			if (value == 3 || value == 2) && len(occurences) == 2 {
+				fullHouse = append(fullHouse, hand)
+				return
+			}
+
+			if len(occurences) == 3 && value == 1 {
+				continue
+			}
+
+			if len(occurences) == 3 && value == 2 {
+				twoPairs = append(twoPairs, hand)
+				return
+			}
+
+			if len(occurences) == 3 && value == 3 {
+				threeOfAKind = append(threeOfAKind, hand)
+				return
+			}
+
+			if len(occurences) == 4 {
+				onePair = append(onePair, hand)
+				return
+			}
+
+			if len(occurences) == 5 {
+				highCard = append(highCard, hand)
+				return
+			}
+		}
+		fmt.Println(hand)
+		fmt.Println("this shoulnt happen")
+		return
+	}
 }
